@@ -1,5 +1,6 @@
 const Shape = require('./lib/shapes')
 const Element = require("./lib/svg");
+const Colors = require("./lib/css_colors")
 
 const fs = require('fs')
 const inquirer = require('inquirer');
@@ -24,8 +25,12 @@ const questions = [
         name: "textColor",
         message: `Provide a color (hex or display) for the title text`,
         validate: (answer) => {
-            console.clear()
-            return true
+            if (checkColor(answer)) {
+                return true
+            } else {
+                console.clear()
+                console.log("Please enter a valid color!")
+            }
         },
     },
     {
@@ -34,8 +39,12 @@ const questions = [
         message: "Select which shape you would like to use for the logo",
         choices: Object.keys(Shape),
         validate: (answer) => {
-            console.clear()
-            return true
+            if (checkColor(answer)) {
+                return true
+            } else {
+                console.clear()
+                console.log("Please enter a valid color!")
+            }
         },
     },
     {
@@ -48,6 +57,10 @@ const questions = [
         },
     },
 ];
+
+const checkColor = (color) => {
+    return (color.toLowerCase() in Colors) || /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+}
 function saveOutput(outputSVG, fileName) {
 
     try {
@@ -94,7 +107,7 @@ function renderLogo(textChoice, textColorChoice, shapeChoice, shapeColorChoice, 
 }
 
 function init() {
-    const answers = inquirer.prompt(questions).then(answers => {
+    inquirer.prompt(questions).then(answers => {
         renderLogo(answers.text, answers.textColor, answers.shape, answers.shapeColor)
     })
 }
