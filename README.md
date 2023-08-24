@@ -12,6 +12,7 @@ The project revolves around using node and OOP to generate a logo using user pro
 in order to run this program, you enter 'node index.js' into your terminal and answer the following prompts. 
 ## Usage
 answer the following prompts, and you can use an SVG extention to preview it in your code.
+Link to video : https://drive.google.com/file/d/1iClw2W0tkwFf_rMJTWJtyUPmIHHD3nju/view 
 
 ## License
 MIT
