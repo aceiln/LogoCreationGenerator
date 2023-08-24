@@ -1,74 +1,102 @@
+const Shape = require('./lib/shapes')
+const Element = require("./lib/svg");
+
+const fs = require('fs')
 const inquirer = require('inquirer');
-const filesystem = require('./node_modules/graceful-fs/graceful-fs');
 
 const questions = [
     {
-        type: "input",
+        type: "text",
         name: "text",
-        message: "Provide the three characters",
-        validate: (input) => input.length === 3,
+        message: "Provide the title of your logo",
+        validate: (answer) => {
+            console.clear()
+            if (answer.length <= 3) {
+                return true
+            } else {
+                console.clear()
+                console.log("Title can only be a maxmium of 3 characters!")
+            }
+        },
     },
     {
         type: "input",
         name: "textColor",
-        message: `Provide a hex color`
+        message: `Provide a color (hex or display) for the title text`,
+        validate: (answer) => {
+            console.clear()
+            return true
+        },
     },
     {
         type: "list",
         name: "shape",
-        message: "Provide the shape, i.e. triangle, square, or circle",
-        choices: ['Triangle', 'Square', 'Circle']
+        message: "Select which shape you would like to use for the logo",
+        choices: Object.keys(Shape),
+        validate: (answer) => {
+            console.clear()
+            return true
+        },
     },
     {
         type: "input",
         name: "shapeColor",
-        message: "Provide the hex color for your shape"
-    }
+        message: `Provide a color (hex or display) for the shape in the logo`,
+        validate: (answer) => {
+            console.clear()
+            return true
+        },
+    },
 ];
-
-
-function logoInput(content) {
-    console.clear()
+function saveOutput(outputSVG, fileName) {
 
     try {
-        if (!fs.existsSync('./output/')) {
-            fs.mkdirSync('./output/');
+        if (!fs.existsSync('./outputs/')) {
+            fs.mkdirSync('./outputs/');
         }
-        fs.writeFileSync('./output/README.md', content, 'utf-8');
-        console.log("Generated output in 'output' folder as 'README.md'")
+
+        fs.writeFile(`./outputs/${fileName ?? `output_${Date.now()}`}.svg`, outputSVG, (err) => {
+            if (err)
+                console.log(err);
+            else {
+                console.log("File written successfully!");
+            }
+        });
     } catch (err) {
         console.error(err);
-        console.log("F")
     }
+}
+
+function renderLogo(textChoice, textColorChoice, shapeChoice, shapeColorChoice, outputFileName) {
+    let shape
+
+    switch (shapeChoice) {
+        case "Circle":
+            shape = new Shape.Circle()
+            break
+        case "Triangle":
+            shape = new Shape.Triangle()
+            break
+        default:
+            shape = new Shape.Square()
+            break
+    }
+
+    shape.setColor(shapeColorChoice)
+
+    let text = new Element.BrandText()
+    text.setText(textChoice)
+    text.setColor(textColorChoice)
+
+    let svg = new Element.Svg(shape, text)
+
+    saveOutput(svg.render(), `${textChoice}_${shapeChoice}`)
 }
 
 function init() {
-    inquirer
-        .prompt(questions)
-        .then((answers) => {
-            let readMeFile = []
-            readMeFile.push(`${answers.text}\n`)
-
-            readMeFile.push(`${answers.textColor}\n`)
-
-            readMeFile.push(`${answers.shape}\n`)
-
-            readMeFile.push(`${answers.shapeColor}`)
-            logoInput(readMeFile.join(""))
-        })
-        .catch((error) => {
-            console.error(error)
-        });
+    const answers = inquirer.prompt(questions).then(answers => {
+        renderLogo(answers.text, answers.textColor, answers.shape, answers.shapeColor)
+    })
 }
 
-// Function call to initialize app
-init();
-
-/**
- * 0 - Title
- * 1 - Description
- * 2 - Installtion
- * 3 - Usage
- * 4 - Contribution
- * 5 - Tests
- */
+init()
